@@ -17,8 +17,9 @@ response.solr_docs.each do |doc|
 end
 
 # complex search
+q = "*:*"
 fq = SolrLite::FilterQuery.new("subjects", ["school hygiene"])
-params = SolrLite::SearchParams.new("*:*", [fq])
+params = SolrLite::SearchParams.new(q, [fq])
 response = solr.search(params)
 puts response.num_found
 response.solr_docs.each do |doc|

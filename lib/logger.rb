@@ -1,5 +1,5 @@
 module SolrLite
-  class Logger
+  class ConsoleLogger
     def self.info(msg)
       puts msg
     end
