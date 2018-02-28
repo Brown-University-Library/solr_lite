@@ -4,12 +4,19 @@ require "json"
 require "search_params.rb"
 require "response.rb"
 module SolrLite
+
+  class DefaultLogger
+    def self.info(msg)
+      puts "SolrLite: #{msg}"
+    end
+  end
+
   class Solr
     # Creates an instance of the Solr class.
     # Parameters:
     #   solr_url: string with the URL to Solr ("http://localhost:8983/solr/bibdata")
     #   logger: an instance of Rails::logger if using Rails.
-    #       Could also be SolrLite::Logger which defaults to the console.
+    #       Could also be SolrLite::DefaultLogger which defaults to the console.
     #       Or nil to omit logging.
     def initialize(solr_url, logger = nil)
       raise "No solr_url was indicated" if solr_url == nil

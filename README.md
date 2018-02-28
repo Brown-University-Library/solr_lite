@@ -35,7 +35,12 @@ The code is under the `lib` folder. The main files are:
 
 
 ## Tests
-Rudimentary "unit tests" are under the `tests` folder. Run `ruby tests/test.rb` to execute them. These tests assume that you have a Solr core created and populated with the data on the `tests/books.json` file.
+There is a rudimentary set of unit tests are under the `test` folder. You need to have `minitest` installed to run them:
+
+```
+gem install minitest
+ruby test/run_all.rb
+```
 
 
 ## Building the gem
@@ -46,5 +51,5 @@ For testing while developing I run the following commands
 gem uninstall solr_lite
 gem build solr_lite.gemspec
 gem install solr_lite-0.0.3.gem
-ruby tests/test.rb
+ruby test/run_all.rb
 ```
