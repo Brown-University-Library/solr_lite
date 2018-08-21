@@ -1,6 +1,7 @@
 require "facet_field.rb"
 require "explainer.rb"
 require "spellcheck.rb"
+require "highlights.rb"
 module SolrLite
   class Response
     attr_accessor :items, :solr_response
@@ -9,6 +10,8 @@ module SolrLite
       @solr_response = solr_response
       @params = params
       @explainer = nil
+      @highlights = nil
+
       set_facet_values()
 
       # This value can be set by the client if we want to use a custom
@@ -110,5 +113,8 @@ module SolrLite
       @spellcheck ||= SolrLite::Spellcheck.new(@solr_response)
     end
 
+    def highlights()
+      @highlights ||= SolrLite::Highlights.new(@solr_response)
+    end
   end # class
 end # module

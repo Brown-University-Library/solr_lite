@@ -1,5 +1,7 @@
 SolrLite is a lightweight class to execute commands against Solr from Ruby.
 
+Information about to create a gem http://guides.rubygems.org/make-your-own-gem/
+
 ## Samples of usage
 ```
 require 'solr_lite'
@@ -42,14 +44,20 @@ gem install minitest
 ruby test/run_all.rb
 ```
 
+but if you have an older version of them gem installed they might pick that one up instead of the code in this folder. To be absolutely sure I am testing the correct version I uninstall/install them gem as shown in the script below.
 
 ## Building the gem
 To build the gem run `gem build solr_lite.gemspec`. If you make changes to the code be sure to update the version specified in `solr_lite.gemspec` so that you get a new versioned gem.
 
-For testing while developing I run the following commands
+For testing while developing I run the following commands:
 ```
 gem uninstall solr_lite
 gem build solr_lite.gemspec
-gem install solr_lite-0.0.3.gem
+gem install solr_lite-0.0.6.gem
 ruby test/run_all.rb
+```
+
+To publish a new version of the gem
+```
+gem push solr_lite-0.0.6.gem
 ```

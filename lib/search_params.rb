@@ -2,7 +2,8 @@ require "filter_query.rb"
 require "facet_field.rb"
 module SolrLite
   class SearchParams
-    attr_accessor :q, :fq, :facets, :page, :page_size, :fl, :sort, :facet_limit
+    attr_accessor :a, :q, :fq, :facets, :page, :page_size, :fl, :sort, :facet_limit,
+      :spellcheck, :hl, :hl_fl, :hl_snippets
 
     DEFAULT_PAGE_SIZE = 20
 
@@ -15,6 +16,11 @@ module SolrLite
       @fl = nil
       @sort = ""
       @facet_limit = nil
+      @spellcheck = false
+      # Solr's hit highlighting parameters
+      @hl = false
+      @hl_fl = nil
+      @hl_snippets = 1
     end
 
     def facet_for_field(field)
@@ -90,6 +96,19 @@ module SolrLite
       qs += "&start=#{start_row()}"
       if sort != ""
         qs += "&sort=#{CGI.escape(@sort)}"
+      end
+      if @spellcheck
+        qs += "&spellcheck=on"
+      end
+      # hit highlighting parameters
+      if @hl
+        qs += "&hl=true"
+        if @hl_fl != nil
+          qs += "&hl.fl=#{@hl_fl}"
+        end
+        if @hl_snippets > 1
+          qs += "&hl.snippets=#{@hl_snippets}"
+        end
       end
       if @facets.count > 0
         qs += "&facet=on"

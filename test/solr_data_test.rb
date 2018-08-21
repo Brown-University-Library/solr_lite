@@ -3,8 +3,9 @@ require "solr_lite"
 class SolrDataTest < Minitest::Test
   #
   # These tests depend on a running version of Solr with the data
-  # found in books.json.
-  #   TODO: Document how to upload the sample data.
+  # found in books.json. With Solr 7.x you can upload the data via:
+  #
+  #   $ path-to-solr/bin/post -c bibdata books.json
   #
   def setup()
     solr_url = "http://localhost:8983/solr/bibdata"
@@ -20,7 +21,7 @@ class SolrDataTest < Minitest::Test
   end
 
   def test_simple_search
-    response = @solr.search_text("title:'Songs of the Lakes and other poems'")
+    response = @solr.search_text('title:"Songs of the Lakes and other poems"')
     assert_equal 1, response.num_found
   end
 
@@ -35,10 +36,30 @@ class SolrDataTest < Minitest::Test
     end
   end
 
-  def test_spellcheck
-    response = @solr.search_text("washingtn")
-    assert_equal "washingtn", response.spellcheck.suggestions()[0]
-    assert_equal "washington", response.spellcheck.suggestions()[1]["suggestion"].first
-    assert_equal "washington", response.spellcheck.top_collation_query()
+  def test_highlighting
+    params = SolrLite::SearchParams.new("title:washington", [])
+    params.hl = true
+    params.hl_fl = "title"
+    response = @solr.search(params, [], nil, nil, true)
+    highlights = response.highlights()
+    first_id = response.solr_docs[0]["id"]
+    assert highlights != nil
+    assert highlights.for(first_id) != nil
   end
+
+
+  # The default configuration in solrconfig.xml for the spellchecker uses the _text_
+  # field but we don't have this field defined in our schema.
+  #
+  # TODO: define the field in the schema or update the solrconfig.xml so that the
+  #       spell checker can be tested without manual intervention.
+  #
+  # def test_spellcheck
+  #   params = SolrLite::SearchParams.new("title:washingtn", [])
+  #   params.spellcheck = true
+  #   response = @solr.search(params, [], nil, nil, true)
+  #   assert_equal "washingtn", response.spellcheck.suggestions()[0]
+  #   assert_equal "washington", response.spellcheck.suggestions()[1]["suggestion"].first
+  #   assert_equal "washington", response.spellcheck.top_collation_query()
+  # end
 end
