@@ -5,4 +5,4 @@ gem install solr_lite-0.0.7.gem
 
 ruby test/run_all.rb
 
-gem push solr_lite-0.0.7.gem
+# gem push solr_lite-0.0.7.gem

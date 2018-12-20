@@ -60,8 +60,8 @@ module SolrLite
 
     # Issues a search request to Solr.
     #
-    # @param params [SolrParams] Search parameters.
-    # @param extra_fqs [Array] Array of [SolrLite::FilterQuery] objects. This is used to
+    # @param params [SolrLite::SearchParams] Search parameters.
+    # @param extra_fqs [Array] Array of {SolrLite::FilterQuery} objects. This is used to
     #     add filters to the search that we don't want to allow the
     #     user to override.
     # @param qf [String] Use to override the server's qf value.
