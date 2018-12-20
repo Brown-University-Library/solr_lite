@@ -1,8 +1,8 @@
 # http://guides.rubygems.org/make-your-own-gem/
 gem uninstall solr_lite
 gem build solr_lite.gemspec
-gem install solr_lite-0.0.6.gem
+gem install solr_lite-0.0.7.gem
 
 ruby test/run_all.rb
 
-# gem push solr_lite-0.0.6.gem
+gem push solr_lite-0.0.7.gem

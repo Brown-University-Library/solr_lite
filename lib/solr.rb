@@ -11,31 +11,45 @@ module SolrLite
     end
   end
 
+  # Represents a Solr instance.
+  # This is the main public interface to submit commands (get, search, delete, update) to Solr.
+  #
   class Solr
+
+    # [String] Set this value if you want to send a query parser (defType) attribute to Solr
+    # when submitting commands. Leave as nil to use the value configured on the server.
+    attr_accessor :def_type
+
     # Creates an instance of the Solr class.
-    # Parameters:
-    #   solr_url: string with the URL to Solr ("http://localhost:8983/solr/bibdata")
-    #   logger: an instance of Rails::logger if using Rails.
-    #       Could also be SolrLite::DefaultLogger which defaults to the console.
-    #       Or nil to omit logging.
+    #
+    # @param solr_url [String] URL to Solr, e.g. "http://localhost:8983/solr/bibdata"
+    # @param logger [Object] An object that provides an `info` method to log information about the requests.
+    #     It could be an instance of Rails::logger if using Rails or an instance of SolrLite::DefaultLogger
+    #     that outputs to the console. Use `nil` to omit logging.
+    #
     def initialize(solr_url, logger = nil)
       raise "No solr_url was indicated" if solr_url == nil
       @solr_url = solr_url
       @logger = logger
+      @def_type = nil
     end
 
     # Fetches a Solr document by id.
-    # Parameters:
-    #   id: ID of the document to fetch.
-    #   q_field: Query field (defaults to "q")
-    #   fl: list of fields to fetch (defaults to "*")
     #
-    # Returns a hash with the document information or nil if no document was found.
-    # Raises an exception if more than one document was found.
+    # @param id [String] ID of the document to fetch.
+    # @param q_field [String] Query field.
+    # @param fl [String] List of fields to fetch.
+    #
+    # @return [Hash] The document found or nil if no document was found.
+    #     Raises an exception if more than one document was found.
+    #
     def get(id, q_field = "q", fl = "*")
       query_string = "#{q_field}=id%3A#{id}"     # %3A => :
       query_string += "&fl=#{fl}"
       query_string += "&wt=json&indent=on"
+      if @def_type != nil
+        query_string += "&defType=#{@def_type}"
+      end
       url = "#{@solr_url}/select?#{query_string}"
       solr_response = Response.new(http_get(url), nil)
       if solr_response.num_found > 1
@@ -45,16 +59,17 @@ module SolrLite
     end
 
     # Issues a search request to Solr.
-    # Parameters:
-    #   params: an instance of SolrParams.
-    #   extra_fqs: array of FilterQuery objects. This is used to
+    #
+    # @param params [SolrParams] Search parameters.
+    # @param extra_fqs [Array] Array of [SolrLite::FilterQuery] objects. This is used to
     #     add filters to the search that we don't want to allow the
     #     user to override.
-    #   qf: Used to override the server's qf value.
-    #   mm: Used to override the server's mm value.
-    #   debug: true to include debugQuery info in the response. (defaults to false)
+    # @param qf [String] Use to override the server's qf value.
+    # @param mm [String] Use to override the server's mm value.
+    # @param debug [Bool] Set to `true` to include `debugQuery` info in the response.
     #
-    # Returns an instance of SolrLite::Response
+    # @return [SolrLite::Response] The result of the search.
+    #
     def search(params, extra_fqs = [], qf = nil, mm = nil, debug = false)
       if params.fl != nil
         query_string = "fl=#{params.fl.join(",")}"
@@ -78,28 +93,55 @@ module SolrLite
         query_string += "&debugQuery=true"
       end
 
+      if @def_type != nil
+        query_string += "&defType=#{@def_type}"
+      end
+
       url = "#{@solr_url}/select?#{query_string}"
       http_response = http_get(url)
       response = Response.new(http_response, params)
       response
     end
 
-    # shortcut for search
+    # Shortcut for the `search` method.
+    #
+    # @param terms [String] the value to use as the query (q) in Solr.
+    # @return [SolrLite::Response] The result of the search.
+    #
     def search_text(terms)
       params = SearchParams.new(terms)
       search(params)
     end
 
+    # Calculates the starting row for a given page and page size.
+    #
+    # @param page [Integer] Page number.
+    # @param page_size [Integer] Number of documents per page.
+    #
+    # @return [Integer] The row number to pass to Solr to start at the given page.
+    #
     def start_row(page, page_size)
       (page - 1) * page_size
     end
 
+    # Issues an update to Solr with the data provided.
+    #
+    # @param json [String] String the data in JSON format to sent to Solr.
+    #     Usually in the form `"[{ f1:v1, f2:v2 }, { f1:v3, f2:v4 }]"`
+    # @return [SolrLite::Response] The result of the update.
+    #
     def update(json)
       url = @solr_url + "/update?commit=true"
       solr_response = http_post_json(url, json)
       solr_response
     end
 
+
+    # Deletes a Solr document by id.
+    #
+    # @param id [String] ID of the document to delete.
+    # @return [SolrLite::Response] The result of the delete.
+    #
     def delete_by_id(id)
       # Use XML format here because that's the only way I could get
       # the delete to recognize ids with a colon (e.g. bdr:123).
@@ -113,6 +155,11 @@ module SolrLite
       solr_response
     end
 
+    # Deletes all documents that match a query in Solr.
+    #
+    # @param query [String] The query to pass to Solr.
+    # @return [SolrLite::Response] The result of the delete.
+    #
     def delete_by_query(query)
       url = @solr_url + "/update?commit=true"
       payload = '{ "delete" : { "query" : "' + query + '" } }'
@@ -120,6 +167,10 @@ module SolrLite
       solr_response
     end
 
+    # Deletes all documents in Solr.
+    #
+    # @return [SolrLite::Response] The result of the delete.
+    #
     def delete_all!()
       delete_by_query("*:*")
     end

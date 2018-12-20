@@ -1,12 +1,54 @@
 require "filter_query.rb"
 require "facet_field.rb"
 module SolrLite
+
+  # Represents the parameters to send to Solr during a search.
   class SearchParams
-    attr_accessor :a, :q, :fq, :facets, :page, :page_size, :fl, :sort, :facet_limit,
-      :spellcheck, :hl, :hl_fl, :hl_snippets
+
+    # [String] The q value to pass to Solr.
+    attr_accessor :q
+
+    # [Array] Array of {SolrLite::FilterQuery} objects to pass to Solr.
+    attr_accessor :fq
+
+    # [Array] Array of {SolrLite::FacetField} objects to pass to Solr.
+    attr_accessor :facets
+
+    # [Integer] Page number to request from Solr.
+    attr_accessor :page
+
+    # [Integer] Number of documents per page to request from Solr.
+    attr_accessor :page_size
+
+    # [String] List of fields to request from Solr.
+    attr_accessor :fl
+
+    # [String] Sort string to pass to Solr.
+    attr_accessor :sort
+
+    # [Integer] Number of facet values to request from Solr.
+    attr_accessor :facet_limit
+
+    # [Bool] True to request Solr to use spellchecking (defaults to false).
+    attr_accessor :spellcheck
+
+    #  [Bool] Set to true to request hit highlighting information from Solr.
+    attr_accessor :hl
+
+    #  [String] Sets the highlight fields (hl.fl) to request from Solr.
+    attr_accessor :hl_fl
+
+    #  [Integer] Sets the number of hit highlights to request from Solr.
+    attr_accessor :hl_snippets
 
     DEFAULT_PAGE_SIZE = 20
 
+    # Creates an instance of the SearchParams class.
+    #
+    # @param q [String] The q value to use.
+    # @param fq [Array] An array of {SolrLite::FilterQuery} objects to pass to Solr.
+    # @param facets [Array] An array of {SolrLite::FacetField} objects to pass to Solr.
+    #
     def initialize(q = "", fq = [], facets = [])
       @q = q
       @fq = fq          # array of FilterQuery
@@ -23,10 +65,21 @@ module SolrLite
       @hl_snippets = 1
     end
 
+    # Returns facet information about a given field.
+    #
+    # @param field [String] Name of the field.
+    # @return [SolrLite::FacetField] An object with the facet information.
+    #
     def facet_for_field(field)
       @facets.find {|f| f.name == field}
     end
 
+    # Sets the `remove_url` value for the given facet and value.
+    #
+    # @param field [String] Name of facet field.
+    # @param value [String] Value of the facet field.
+    # @param url [String] URL to set.
+    #
     def set_facet_remove_url(field, value, url)
       facet = facet_for_field(field)
       if facet != nil
@@ -34,10 +87,15 @@ module SolrLite
       end
     end
 
+    # Calculates the starting row number.
+    #
+    # @return [Integer] The starting row number for the current page and page_size.
+    #
     def start_row()
       (@page - 1) * @page_size
     end
 
+    # Sets the starting row number and recalculates the current page based on the current page_size.
     def star_row=(start)
       # recalculate the page
       if @page_size == 0
@@ -48,12 +106,17 @@ module SolrLite
       nil
     end
 
-    # Returns the string that we need render on the Browser to execute
+    # Calculates the query string that we need render on the browser to execute
     # a search with the current parameters.
     #
-    # facet_to_ignore: a FilterQuery object with a value to ignore when
-    #   creating the query string.
-    # q_override: a string with a Solr query to use instead of the current q value
+    # @param facet_to_ignore [SolrLite::FilterQuery] Object with a specific facet to ignore when
+    #     creating the query string. This is used to create the "remove this facet from the search"
+    #     links that are shown to the user.
+    # @param q_override [String] The q value to use if we want to use a different value
+    #     from the current one.
+    #
+    # @return [String] The string calculated.
+    #
     def to_user_query_string(facet_to_ignore = nil, q_override = nil)
       qs = ""
       q_value = q_override != nil ? q_override : @q
@@ -75,12 +138,21 @@ module SolrLite
       qs
     end
 
+    # Calculates the query string that we need render on the browser to execute
+    # a search with the current parameters and NO q parameter.
+    #
+    # @return [String] The string calculated.
+    #
     def to_user_query_string_no_q()
       to_user_query_string(nil, '')
     end
 
-    # Returns the string that we need to pass Solr to execute a search
-    # with the current parameters.
+    # Calculates the query string that needs to be passed to Solr to issue a search
+    # with the current search parameters.
+    #
+    # @param extra_fqs [Array] Array of {SolrLite::FilterQuery} objects to use.
+    # @return [String] Query string to pass to Solr for the current parameters.
+    #
     def to_solr_query_string(extra_fqs = [])
       qs = ""
       if @q != ""
@@ -123,10 +195,12 @@ module SolrLite
       qs
     end
 
-    # Returns an array of values that can be added to an HTML form
-    # to represent the current search parameters. Notice that we do
-    # NOT include the `q` parameter there is typically an explicit
-    # HTML form value for it on the form.
+    # Returns an array of values that can be added to an HTML form to represent the current
+    # search parameters. Notice that we do NOT include the `q` parameter because there is
+    # typically an explicit HTML form value for it on the form.
+    #
+    # @return [Array] An array of Hash objects with the values for the current search.
+    #
     def to_form_values()
       values = []
 
@@ -144,10 +218,21 @@ module SolrLite
       values
     end
 
+    # Returns a friendly string version of this object.
+    #
+    # @return [String] With information about the current search parameters.
+    #
     def to_s()
       "q=#{@q}\nfq=#{@fq}"
     end
 
+    # Creates a SearchParams object with the values in a query string.
+    # This is the inverse of `to_user_query_string()`.
+    #
+    # @param qs [String] A query string with the search parameters to use.
+    # @param facet_fields [Array] An array of {SolrLite::FacetField} to set in the returned object.
+    # @return [SolrLite::SearchParams] An object prepopulated with the values indicated in the query string.
+    #
     def self.from_query_string(qs, facet_fields = [])
       params = SearchParams.new
       params.facets = facet_fields
