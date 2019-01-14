@@ -15,7 +15,8 @@ module SolrLite
       set_facet_values()
 
       # This value can be set by the client if we want to use a custom
-      # representation of solr_docs
+      # representation of solr_docs while preserving the entire Response
+      # object.
       @items = []
     end
 
@@ -39,7 +40,22 @@ module SolrLite
     # Total number documents found in solr
     # usually larger than solr_docs.count
     def num_found
-      @solr_response["response"]["numFound"]
+
+      if @solr_response["response"] != nil
+        # Normal Solr query
+        return @solr_response["response"]["numFound"]
+      end
+
+      if @solr_response["grouped"] != nil
+        # Grouped Solr query.
+        total = 0
+        @solr_response["grouped"].keys.each do |key|
+          total += @solr_response["grouped"][key]["matches"]
+        end
+        return total
+      end
+
+      return 0
     rescue
       0
     end
@@ -59,7 +75,16 @@ module SolrLite
 
     # Start position for retrieval (used for pagination)
     def start
-      @solr_response["response"]["start"].to_i
+      if @solr_response["response"] != nil
+        @solr_response["response"]["start"].to_i
+      else
+        # For grouped responses
+        # (I believe we could use this value for grouped and not-grouped
+        # responses, but for backwards compatibility and since I have not
+        # tested it for non-grouped responses, for now we only use it for
+        # grouped responses.)
+        @solr_response["responseHeader"]["params"]["start"].to_i
+      end
     rescue
       0
     end
@@ -76,6 +101,21 @@ module SolrLite
     # Raw solr_docs
     def solr_docs
       @solr_response["response"]["docs"]
+    end
+
+    # Groups in the solr_docs (see Solr.search_group())
+    def solr_groups(group_field)
+      return [] if @solr_response["grouped"] == nil
+      @solr_response["grouped"][group_field]["groups"].map {|x| x["groupValue"]}
+    end
+
+    # Documents for a given group field and value (see Solr.search_group())
+    def solr_docs_for_group(group_field, group_value)
+      group = @solr_response["grouped"][group_field]["groups"]
+      docs_for_value = group.find {|x| x["groupValue"] == group_value }
+      return [] if docs_for_value == nil
+      docs = docs_for_value["doclist"]["docs"]
+      docs
     end
 
     def facets

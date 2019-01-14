@@ -71,34 +71,13 @@ module SolrLite
     # @return [SolrLite::Response] The result of the search.
     #
     def search(params, extra_fqs = [], qf = nil, mm = nil, debug = false)
-      if params.fl != nil
-        query_string = "fl=#{params.fl.join(",")}"
-      else
-        query_string = "" # use Solr defaults
-      end
+      http_response = search_core(params, extra_fqs, qf, mm, debug, nil, 0)
+      response = Response.new(http_response, params)
+      response
+    end
 
-      query_string += "&wt=json&indent=on"
-      query_string += "&" + params.to_solr_query_string(extra_fqs)
-      query_string += "&q.op=AND"
-
-      if qf != nil
-        query_string += "&qf=#{CGI.escape(qf)}"
-      end
-
-      if mm != nil
-        query_string += "&mm=#{CGI.escape(mm)}"
-      end
-
-      if debug
-        query_string += "&debugQuery=true"
-      end
-
-      if @def_type != nil
-        query_string += "&defType=#{@def_type}"
-      end
-
-      url = "#{@solr_url}/select?#{query_string}"
-      http_response = http_get(url)
+    def search_group(params, extra_fqs = [], qf = nil, mm = nil, debug = false, group_field, group_limit)
+      http_response = search_core(params, extra_fqs, qf, mm, debug, group_field, group_limit)
       response = Response.new(http_response, params)
       response
     end
@@ -176,6 +155,43 @@ module SolrLite
     end
 
     private
+      def search_core(params, extra_fqs, qf, mm, debug, group_field, group_limit)
+        if params.fl != nil
+          query_string = "fl=#{params.fl.join(",")}"
+        else
+          query_string = "" # use Solr defaults
+        end
+
+        query_string += "&wt=json&indent=on"
+        query_string += "&" + params.to_solr_query_string(extra_fqs)
+        query_string += "&q.op=AND"
+
+        if qf != nil
+          query_string += "&qf=#{CGI.escape(qf)}"
+        end
+
+        if mm != nil
+          query_string += "&mm=#{CGI.escape(mm)}"
+        end
+
+        if debug
+          query_string += "&debugQuery=true"
+        end
+
+        if group_field != nil
+          # See https://lucene.apache.org/solr/guide/7_0/result-grouping.html
+          #     and https://wiki.apache.org/solr/FieldCollapsing
+          query_string += "&group=true&group.field=#{group_field}&group.limit=#{group_limit}"
+        end
+
+        if @def_type != nil
+          query_string += "&defType=#{@def_type}"
+        end
+
+        url = "#{@solr_url}/select?#{query_string}"
+        http_response = http_get(url)
+      end
+
       def http_post_json(url, payload)
         content_type = "application/json"
         http_response = http_post(url, payload, content_type)
