@@ -1,4 +1,4 @@
-SolrLite is a lightweight class to execute commands against Solr from Ruby.
+SolrLite is a lightweight class to execute commands against Solr from Ruby. Requires no extra dependencies.
 
 Information about to create a gem http://guides.rubygems.org/make-your-own-gem/
 

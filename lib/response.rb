@@ -60,6 +60,17 @@ module SolrLite
       0
     end
 
+    # Total number documents found in Solr
+    # for a given group field/value/
+    def num_found_for_group(group_field, group_value)
+      group = @solr_response["grouped"][group_field]["groups"]
+      docs_for_value = group.find {|x| x["groupValue"] == group_value }
+      return 0 if docs_for_value == nil
+      docs_for_value["doclist"]["numFound"]
+    rescue
+      0
+    end
+
     def num_pages
       return 0 if page_size == 0
       pages = (num_found / page_size).to_i

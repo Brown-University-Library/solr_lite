@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "solr_lite"
-  s.version = "0.0.8"
-  s.date = "2018-12-20"
+  s.version = "0.0.9"
+  s.date = "2019-01-14"
   s.summary = "A lightweight gem to connect to Solr and run queries"
   s.description = "A lightweight gem to connect to Solr and run queries. Requires no extra dependencies."
   s.authors = ["Hector Correa"]
@@ -11,6 +11,6 @@ Gem::Specification.new do |s|
     "lib/facet_field.rb", "lib/filter_query.rb",
     "lib/highlights.rb", "lib/search_params.rb",
     "lib/response.rb", "lib/spellcheck.rb"]
-  s.homepage    = "https://github.com/Brown-University-Library/solr_lite"
-  s.license     = "MIT"
+  s.homepage = "https://github.com/Brown-University-Library/solr_lite"
+  s.license = "MIT"
 end
