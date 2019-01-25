@@ -105,4 +105,41 @@ class SearchParamsTest < Minitest::Test
     assert solr_qs.include?('q=B+%26+W')
     assert solr_qs.include?('fq=%28published_in%3A%22Signs%3A+Journal+of+Women%27s+in+Culture+%26+Society%22%29')
   end
+
+  def test_to_solr_facet_ranges
+    # Default facets with no ranges
+    q = "*"
+    fq = []
+    params = SolrLite::SearchParams.new(q, fq, default_facets())
+    qs = params.to_solr_query_string
+    assert qs.include?("&facet.field=fieldA")
+    assert qs.include?("&facet.field=fieldB")
+    assert !qs.include?("&facet.range")
+
+    # Add two facets with ranges
+    facets = default_facets()
+    range1 = SolrLite::FacetField.new("fieldR1", "Field R1")
+    range1.range = true
+    range1.range_start=10
+    range1.range_end=100
+    range1.range_gap=5
+    facets << range1
+    range2 = SolrLite::FacetField.new("fieldR2", "Field R2")
+    range2.range = true
+    range2.range_start=3
+    range2.range_end=9
+    range2.range_gap=1
+    facets << range2
+    params = SolrLite::SearchParams.new(q, fq, facets)
+    qs = params.to_solr_query_string
+    assert qs.include?("&facet.field=fieldA")
+    assert qs.include?("&facet.field=fieldB")
+    assert qs.include?("&facet.range=fieldR1&facet.range=fieldR2")
+    assert qs.include?("&f.fieldR1.facet.range.start=10")
+    assert qs.include?("&f.fieldR1.facet.range.end=100")
+    assert qs.include?("&f.fieldR1.facet.range.gap=5")
+    assert qs.include?("&f.fieldR2.facet.range.start=3")
+    assert qs.include?("&f.fieldR2.facet.range.end=9")
+    assert qs.include?("&f.fieldR2.facet.range.gap=1")
+  end
 end

@@ -1,3 +1,4 @@
+
 require "filter_query.rb"
 require "facet_field.rb"
 module SolrLite
@@ -158,21 +159,27 @@ module SolrLite
       if @q != ""
         qs += "&q=#{@q}"
       end
+
+      # Filter query
       @fq.each do |filter|
         qs += "&fq=#{filter.solr_value}"
       end
+
       extra_fqs.each do |filter|
         qs += "&fq=#{filter.solr_value}"
       end
+
       qs += "&rows=#{@page_size}"
       qs += "&start=#{start_row()}"
       if sort != ""
         qs += "&sort=#{CGI.escape(@sort)}"
       end
+
       if @spellcheck
         qs += "&spellcheck=on"
       end
-      # hit highlighting parameters
+
+      # Hit highlighting parameters
       if @hl
         qs += "&hl=true"
         if @hl_fl != nil
@@ -182,16 +189,31 @@ module SolrLite
           qs += "&hl.snippets=#{@hl_snippets}"
         end
       end
+
+      # Facets
       if @facets.count > 0
         qs += "&facet=on"
+
+        facet_ranges = @facets.select {|f| f.range == true }.map { |f| f.name }
+        facet_ranges.each do |field_name|
+          qs += "&facet.range=#{field_name}"
+        end
+
         @facets.each do |f|
           qs += "&facet.field=#{f.name}"
           qs += "&f.#{f.name}.facet.mincount=1"
           if @facet_limit != nil
             qs += "&f.#{f.name}.facet.limit=#{@facet_limit}"
           end
+
+          if f.range
+            qs += "&f.#{f.name}.facet.range.start=#{f.range_start}"
+            qs += "&f.#{f.name}.facet.range.end=#{f.range_end}"
+            qs += "&f.#{f.name}.facet.range.gap=#{f.range_gap}"
+          end
         end
       end
+
       qs
     end
 

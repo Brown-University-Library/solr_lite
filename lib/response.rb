@@ -135,6 +135,7 @@ module SolrLite
 
     def set_facet_values()
       return if @solr_response["facet_counts"] == nil
+      solr_ranges = @solr_response["facet_counts"]["facet_ranges"] || {}
       solr_facets = @solr_response["facet_counts"]["facet_fields"]
       solr_facets.each do |solr_facet|
         # solr_facet is an array with two elements, e.g.
@@ -144,16 +145,33 @@ module SolrLite
         # the second element is an array with of value/count pairs (PEOPLE/32, ORG/4)
         field_name = solr_facet[0]
         facet_field = @params.facet_for_field(field_name)
-        values = solr_facet[1]
-        pairs = values.count/2
-        for pair in (1..pairs)
-          index = (pair-1) * 2
-          text = values[index]
-          count = values[index+1]
-          facet_field.add_value(text, count)
+        if facet_field.range
+          # Use the range values as the facet values.
+          #
+          # Notice that we are overloading the "values" field and therefore
+          # we lose (i.e. don't store) the actual facet values and their counts.
+          # We might want to rethink this and keep them both.
+          values = solr_ranges[facet_field.name]["counts"] || []
+          pairs_count = values.count/2
+          for pair in (1..pairs_count)
+            index = (pair-1) * 2
+            start_range = values[index].to_i
+            end_range = start_range + facet_field.range_gap - 1
+            count = values[index+1]
+            facet_field.add_range(start_range, end_range, count)
+          end
+        else
+          # Regular facet values
+          values = solr_facet[1]
+          pairs = values.count/2
+          for pair in (1..pairs)
+            index = (pair-1) * 2
+            text = values[index]
+            count = values[index+1]
+            facet_field.add_value(text, count)
+          end
         end
       end
-      # TODO: make sure we sort the FacetField.VALUES descending by count
     end
 
     def explainer()

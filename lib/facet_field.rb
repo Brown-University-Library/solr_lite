@@ -2,28 +2,49 @@ module SolrLite
   class FacetField
 
     class FacetValue
-      attr_accessor :text, :count, :remove_url, :add_url
+      attr_accessor :text, :count, :remove_url, :add_url, :range_start, :range_end
       def initialize(text = "", count = 0, remove_url = nil)
         @text = text
         @count = count
         @remove_url = remove_url
         @add_url = nil
+        @range_start = nil
+        @range_end = nil
       end
     end
 
-    attr_accessor :name, :title, :values
+    attr_accessor :name, :title, :values,
+      :range, :range_start, :range_end, :range_gap
+
     def initialize(name, display_value)
       @name = name # field name in Solr
       @title = display_value
       @values = []
+      @ranges = []
+      @range = false
+      @range_start = nil
+      @range_end = nil
+      @range_gap = nil
     end
 
     def to_qs(text)
       "#{@name}|#{CGI.escape(text)}"
     end
 
+    def to_qs_range(range_start, range_end)
+      "#{@name}^#{range_start},#{range_end}"
+    end
+
     def add_value(text, count)
       @values << FacetValue.new(text, count)
+    end
+
+    def add_range(range_start, range_end, count)
+      text = "#{range_start} - #{range_end}"
+      value = FacetValue.new(text, count)
+      value.range_start = range_start
+      value.range_end = range_end
+      @values << value
     end
 
     def value_count(text)

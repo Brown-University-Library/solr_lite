@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "solr_lite"
-  s.version = "0.0.9"
-  s.date = "2019-01-14"
+  s.version = "0.0.10"
+  s.date = "2019-01-25"
   s.summary = "A lightweight gem to connect to Solr and run queries"
   s.description = "A lightweight gem to connect to Solr and run queries. Requires no extra dependencies."
   s.authors = ["Hector Correa"]
