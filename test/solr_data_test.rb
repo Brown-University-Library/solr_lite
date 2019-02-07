@@ -21,25 +21,25 @@ class SolrDataTest < Minitest::Test
   end
 
   def test_simple_search
-    response = @solr.search_text('title:"Songs of the Lakes and other poems"')
+    response = @solr.search_text('title_txt_en:"Songs of the Lakes and other poems"')
     assert_equal 1, response.num_found
   end
 
   def test_complex_search
-    fq1 = SolrLite::FilterQuery.new("subjects", ["school hygiene"])
+    fq1 = SolrLite::FilterQuery.new("subjects_txts_en", ["school hygiene"])
     params = SolrLite::SearchParams.new("*:*", [fq1])
     response = @solr.search(params, [], nil, nil, true)
     assert response.num_found > 0
     response.solr_docs.each do |doc|
-      target_subject = doc["subjects"].find {|x| x.downcase == "school hygiene"}
+      target_subject = doc["subjects_txts_en"].find {|x| x.downcase == "school hygiene"}
       assert target_subject != nil
     end
   end
 
   def test_highlighting
-    params = SolrLite::SearchParams.new("title:washington", [])
+    params = SolrLite::SearchParams.new("title_txt_en:washington", [])
     params.hl = true
-    params.hl_fl = "title"
+    params.hl_fl = "title_txt_en"
     response = @solr.search(params, [], nil, nil, true)
     highlights = response.highlights()
     first_id = response.solr_docs[0]["id"]
