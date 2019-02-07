@@ -8,6 +8,18 @@ class SearchParamsTest < Minitest::Test
     [facet_A, facet_B]
   end
 
+  def test_from_query_string
+    # Make sure leading and trailing spaces are removed
+    params = SolrLite::SearchParams.from_query_string("q=  &x=1")
+    assert params.q == ""
+
+    params = SolrLite::SearchParams.from_query_string("q=hello world&x=1")
+    assert params.q == "hello+world"
+
+    params = SolrLite::SearchParams.from_query_string("q=  hello world &x=1")
+    assert params.q == "hello+world"
+  end
+
   def test_to_user_query_string
     # Search param defaults
     q = "hello"

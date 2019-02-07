@@ -267,7 +267,7 @@ module SolrLite
         next if value == nil || value.empty?
         case
         when name == "q"
-          params.q = value
+          params.q = url_trim(value)
         when name == "rows"
           params.page_size = value.to_i
         when name == "page"
@@ -288,6 +288,14 @@ module SolrLite
         end
       end
       params
+    end
+
+    # Trims leading and trailing spaces from a URL escaped
+    # string and returns the string escaped.
+    def self.url_trim(value)
+      return "" if value == nil
+      trimmed = CGI.unescape(value).strip
+      CGI.escape(trimmed)
     end
   end
 end
