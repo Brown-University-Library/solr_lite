@@ -17,6 +17,12 @@ class FilterQueryTest < Minitest::Test
     assert_equal "%28F1%3A%5BV1+TO+V2%5D%29", fq.solr_value # (F1:[V1 TO V2])
     assert_equal "F1^V1,V2", fq.qs_value
     assert_equal "F1^V1,V2", fq.form_value
+    assert_equal "V1", fq.range_from
+    assert_equal "V2", fq.range_to
+
+    fq = SolrLite::FilterQuery.new("F1", ["notarange"], true)
+    assert_nil fq.range_from
+    assert_nil fq.range_to
   end
 
   def test_multiple_fq

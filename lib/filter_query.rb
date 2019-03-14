@@ -16,6 +16,18 @@ module SolrLite
       end
     end
 
+    def range_from()
+      tokens = (value || "").split(" - ")
+      return nil if tokens.count != 2
+      tokens[0].gsub("*","")
+    end
+
+    def range_to()
+      tokens = (value || "").split(" - ")
+      return nil if tokens.count != 2
+      tokens[1].gsub("*","")
+    end
+
     # qs is assumed to be the value taken from the query string
     # in the form `field|value` or `field|value1|valueN`.
     #
