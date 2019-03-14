@@ -58,9 +58,9 @@ module SolrLite
       # Creates a filter query (fq) string as needed by Solr from
       # an array of values. Handles single and multi-value gracefully.
       # For single-value it returns "(field:value)". For multi-value
-      # it returns "(field:value1) OR (field:value2)"
-      #
-      # TODO: Should multivalue use an AND instead of an OR?
+      # it returns "(field:value1) OR (field:value2)". We use the
+      # multi-value in the Advanced Search when we allow the user to
+      # select multiple values for a single facet.
       def to_solr_fq_value(field, values)
         solr_value = ""
         values.each_with_index do |v, i|
@@ -75,6 +75,12 @@ module SolrLite
       end
 
       def to_solr_fq_value_range(field, range_start, range_end)
+        if range_start.empty?
+          range_start = "*"
+        end
+        if range_end.empty?
+          range_end = "*"
+        end
         solr_value = '(' + field + ':[' + range_start + ' TO ' + range_end + '])'
         # Very important to escape the : otherwise URL.parse throws an error in Linux
         CGI.escape(solr_value)

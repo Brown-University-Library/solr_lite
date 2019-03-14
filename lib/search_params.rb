@@ -202,7 +202,10 @@ module SolrLite
         @facets.each do |f|
           qs += "&facet.field=#{f.name}"
           qs += "&f.#{f.name}.facet.mincount=1"
-          if @facet_limit != nil
+
+          if f.limit != nil
+            qs += "&f.#{f.name}.facet.limit=#{f.limit}"
+          elsif @facet_limit != nil
             qs += "&f.#{f.name}.facet.limit=#{@facet_limit}"
           end
 

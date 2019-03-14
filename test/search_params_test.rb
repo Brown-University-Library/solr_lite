@@ -154,4 +154,15 @@ class SearchParamsTest < Minitest::Test
     assert qs.include?("&f.fieldR2.facet.range.end=9")
     assert qs.include?("&f.fieldR2.facet.range.gap=1")
   end
+
+  def test_to_solr_facet_limit
+    q = "hello"
+    fq = []
+    params = SolrLite::SearchParams.new(q, fq, default_facets())
+    params.facets[1].limit = 8
+    qs = params.to_solr_query_string()
+    # Make sure facet limit for the second facet is honored
+    assert !qs.include?("&f.fieldA.facet.limit")
+    assert qs.include?("&f.fieldB.facet.limit=8")
+  end
 end

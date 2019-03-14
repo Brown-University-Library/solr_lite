@@ -14,7 +14,8 @@ module SolrLite
     end
 
     attr_accessor :name, :title, :values,
-      :range, :range_start, :range_end, :range_gap
+      :range, :range_start, :range_end, :range_gap,
+      :limit
 
     def initialize(name, display_value)
       @name = name # field name in Solr
@@ -25,6 +26,7 @@ module SolrLite
       @range_start = nil
       @range_end = nil
       @range_gap = nil
+      @limit = nil
     end
 
     def to_qs(text)
