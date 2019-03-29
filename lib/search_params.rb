@@ -21,7 +21,7 @@ module SolrLite
     # [Integer] Number of documents per page to request from Solr.
     attr_accessor :page_size
 
-    # [String] List of fields to request from Solr.
+    # [Array] List of fields names to request from Solr.
     attr_accessor :fl
 
     # [String] Sort string to pass to Solr.
