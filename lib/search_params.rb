@@ -183,7 +183,7 @@ module SolrLite
       if @hl
         qs += "&hl=true"
         if @hl_fl != nil
-          qs += "&hl.fl=#{@hl_fl}"
+          qs += "&hl.fl=" + CGI.escape(@hl_fl)
         end
         if @hl_snippets > 1
           qs += "&hl.snippets=#{@hl_snippets}"
