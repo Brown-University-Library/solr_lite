@@ -36,6 +36,11 @@ The code is under the `lib` folder. The main files are:
 * `response` defines the response returned by Solr.
 
 
+## Documentation
+
+See https://www.rubydoc.info/gems/solr_lite
+
+
 ## Tests
 There is a rudimentary set of unit tests are under the `test` folder. You need to have `minitest` installed to run them:
 
