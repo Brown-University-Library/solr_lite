@@ -60,6 +60,17 @@ module SolrLite
       0
     end
 
+    # Total number of groups found in Solr
+    # for a grouped request.
+    def groups_found
+      if @solr_response["grouped"] != nil && @params.group_count != nil
+        return @solr_response["facets"][@params.group_count]
+      end
+      return 0
+    rescue
+      0
+    end
+
     # Total number documents found in Solr
     # for a given group field/value/
     def num_found_for_group(group_field, group_value)

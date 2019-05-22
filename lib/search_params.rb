@@ -33,14 +33,18 @@ module SolrLite
     # [Bool] True to request Solr to use spellchecking (defaults to false).
     attr_accessor :spellcheck
 
-    #  [Bool] Set to true to request hit highlighting information from Solr.
+    # [Bool] Set to true to request hit highlighting information from Solr.
     attr_accessor :hl
 
-    #  [String] Sets the highlight fields (hl.fl) to request from Solr.
+    # [String] Sets the highlight fields (hl.fl) to request from Solr.
     attr_accessor :hl_fl
 
-    #  [Integer] Sets the number of hit highlights to request from Solr.
+    # [Integer] Sets the number of hit highlights to request from Solr.
     attr_accessor :hl_snippets
+
+    # [String] The name of the value in the response to hold the number of groups found
+    # in a grouped request. Defaults to "group_count", set to nil to omit.
+    attr_accessor :group_count
 
     DEFAULT_PAGE_SIZE = 20
 
@@ -64,6 +68,7 @@ module SolrLite
       @hl = false
       @hl_fl = nil
       @hl_snippets = 1
+      @group_count = "group_count"
     end
 
     # Returns facet information about a given field.

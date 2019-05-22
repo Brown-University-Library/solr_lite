@@ -182,6 +182,16 @@ module SolrLite
           # See https://lucene.apache.org/solr/guide/7_0/result-grouping.html
           #     and https://wiki.apache.org/solr/FieldCollapsing
           query_string += "&group=true&group.field=#{group_field}&group.limit=#{group_limit}"
+
+          if params.group_count != nil
+            # Adds an extra calculated facet to get the total number of groups. This is required
+            # because Solr does not return this value in the response, instead Solr
+            # returns the total number of documents found across all groups, but not
+            # the total number of groups found.
+            # See https://lucene.apache.org/solr/guide/7_7/json-facet-api.html#metrics-example
+            #     and https://stackoverflow.com/a/56138991/446681
+            query_string += '&json.facet={"' + params.group_count + '":"unique(' + group_field + ')"}'
+          end
         end
 
         if @def_type != nil
