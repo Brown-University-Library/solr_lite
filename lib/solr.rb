@@ -65,6 +65,7 @@ module SolrLite
         ids_string = batch.join(" OR ")
         query_string = "#{q_field}=id%3A(#{ids_string})"  # %3A => :
         query_string += "&fl=#{fl}"
+        query_string += "&rows=#{batch_size}"
         query_string += "&wt=json&indent=on"
         if @def_type != nil
           query_string += "&defType=#{@def_type}"
