@@ -64,7 +64,7 @@ module SolrLite
     # for a grouped request.
     def groups_found
       if @solr_response["grouped"] != nil && @params.group_count != nil
-        return @solr_response["facets"][@params.group_count]
+        return @solr_response["facets"][@params.group_count] || 0
       end
       return 0
     rescue
@@ -156,6 +156,12 @@ module SolrLite
         # the second element is an array with of value/count pairs (PEOPLE/32, ORG/4)
         field_name = solr_facet[0]
         facet_field = @params.facet_for_field(field_name)
+
+        if facet_field == nil
+          # Solr returned facets for a field that we did not ask for. Ignore it.
+          next
+        end
+
         if facet_field.range
           # Use the range values as the facet values.
           #
