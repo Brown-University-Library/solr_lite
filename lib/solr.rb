@@ -58,6 +58,24 @@ module SolrLite
       solr_response.solr_docs.first
     end
 
+    def get_many(ids, q_field = "q", fl = "*", batch_size = 20)
+      data = []
+      batches = to_batches(ids, batch_size)
+      batches.each do |batch|
+        ids_string = batch.join(" OR ")
+        query_string = "#{q_field}=id%3A(#{ids_string})"  # %3A => :
+        query_string += "&fl=#{fl}"
+        query_string += "&wt=json&indent=on"
+        if @def_type != nil
+          query_string += "&defType=#{@def_type}"
+        end
+        url = "#{@solr_url}/select?#{query_string}"
+        solr_response = Response.new(http_get(url), nil)
+        data += solr_response.solr_docs
+      end
+      data
+    end
+
     # Issues a search request to Solr.
     #
     # @param params [SolrLite::SearchParams] Search parameters.
@@ -253,6 +271,23 @@ module SolrLite
         if @logger != nil
           @logger.info(msg)
         end
+      end
+
+      def to_batches(arr, batch_size)
+        batch_count = (arr.count / batch_size)
+        if (arr.count % batch_size) > 0
+          batch_count += 1
+        end
+
+        batches = []
+        (1..batch_count).each do |i|
+          start = (i-1) * batch_size
+          stop = start + batch_size - 1
+          batch = arr[start..stop]
+          batches << batch
+        end
+
+        batches
       end
   end
 end
