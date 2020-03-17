@@ -145,6 +145,7 @@ module SolrLite
     end
 
     def set_facet_values()
+      return if @params == nil
       return if @solr_response["facet_counts"] == nil
       solr_ranges = @solr_response["facet_counts"]["facet_ranges"] || {}
       solr_facets = @solr_response["facet_counts"]["facet_fields"]
