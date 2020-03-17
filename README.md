@@ -51,6 +51,8 @@ ruby test/run_all.rb
 
 but if you have an older version of them gem installed they might pick that one up instead of the code in this folder. To be absolutely sure I am testing the correct version I uninstall/install them gem as shown in the script below.
 
+The tests under `./test/solr_data_test.rb` require a very specific Solr core definition and dataset. *TODO: Fully document how to configure this Solr.*
+
 ## Building the gem
 To build the gem run `gem build solr_lite.gemspec`. If you make changes to the code be sure to update the version specified in `solr_lite.gemspec` so that you get a new versioned gem.
 
