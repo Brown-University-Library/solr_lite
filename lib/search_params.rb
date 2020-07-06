@@ -46,6 +46,12 @@ module SolrLite
     # in a grouped request. Defaults to "group_count", set to nil to omit.
     attr_accessor :group_count
 
+    # [String] Sets the qf value to pass to Solr.
+    attr_accessor :qf
+
+    # [String] Sets the pf value to pass to Solr.
+    attr_accessor :pf
+
     DEFAULT_PAGE_SIZE = 20
 
     # Creates an instance of the SearchParams class.
@@ -69,6 +75,8 @@ module SolrLite
       @hl_fl = nil
       @hl_snippets = 1
       @group_count = "group_count"
+      @qf = nil
+      @pf = nil
     end
 
     # Returns facet information about a given field.
@@ -178,6 +186,14 @@ module SolrLite
       qs += "&start=#{start_row()}"
       if sort != ""
         qs += "&sort=#{CGI.escape(@sort)}"
+      end
+
+      if @qf != nil
+        qs += "&qf=#{@qf}"
+      end
+
+      if @pf != nil
+        qs += "&pf=#{@pf}"
       end
 
       if @spellcheck
