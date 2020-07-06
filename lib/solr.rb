@@ -95,8 +95,8 @@ module SolrLite
       response
     end
 
-    def search_group(params, extra_fqs = [], qf = nil, mm = nil, debug = false, group_field, group_limit)
-      http_response = search_core(params, extra_fqs, qf, mm, debug, group_field, group_limit)
+    def search_group(params, extra_fqs = [], qf = nil, mm = nil, debug = false, group_field = nil, group_limit = nil, group_extra = nil)
+      http_response = search_core(params, extra_fqs, qf, mm, debug, group_field, group_limit, group_extra)
       response = Response.new(http_response, params)
       response
     end
@@ -174,7 +174,7 @@ module SolrLite
     end
 
     private
-      def search_core(params, extra_fqs, qf, mm, debug, group_field, group_limit)
+      def search_core(params, extra_fqs, qf, mm, debug, group_field, group_limit, group_extra = nil)
         if params.fl != nil
           query_string = "fl=#{params.fl.join(",")}"
         else
@@ -210,6 +210,10 @@ module SolrLite
             # See https://lucene.apache.org/solr/guide/7_7/json-facet-api.html#metrics-example
             #     and https://stackoverflow.com/a/56138991/446681
             query_string += '&json.facet={"' + params.group_count + '":"unique(' + group_field + ')"}'
+          end
+
+          if group_extra != nil
+            query_string += "&#{group_extra}"
           end
         end
 
